@@ -2,12 +2,11 @@ import pandas as pd
 
 from keras import layers, Model
 
-from sklearn.feature_extraction.text import CountVectorizer
-import itertools
-
 from keras.preprocessing.sequence import pad_sequences
+from keras_preprocessing.text import Tokenizer
 from sklearn.model_selection import train_test_split
-import re
+
+import json
 
 # 读取数据
 
@@ -15,6 +14,9 @@ import re
 # 查看数据
 
 import os
+
+max_features = 95000
+maxlen = 15
 
 print(os.listdir("../input"))
 
@@ -28,53 +30,52 @@ df_test['test_id'] = df_test['test_id'].apply(str)
 
 df_all = pd.concat((df_train, df_test), sort=False)
 
-df_all['question1'].fillna('', inplace=True)
-df_all['question2'].fillna('', inplace=True)
+# train_X = train_df["question_text"].fillna("_##_").values
+
+trian_q_1 = df_all['question1'].fillna('_##_').values
+trian_q_2 = df_all['question2'].fillna('_##_').values
+
+# train_X = df_all["question1"].fillna("_##_").values
 
 # 查看原始数据的格式
 
 print(df_all.shape)
 
-# Create Vocab
 
-counts_vectorizer = CountVectorizer(max_features=10000 - 1).fit(
-    itertools.chain(df_all['question1'], df_all['question2']))
-
-other_index = len(counts_vectorizer.vocabulary_)
-
-# pre_data
+tokenizer = Tokenizer(num_words=max_features)
 
 
-words_tokenizer = re.compile(counts_vectorizer.token_pattern)
+tokenizer.fit_on_texts(list(trian_q_1))  # 用训练集去训练这个分词器，生成id_word 和word_id 等信息 如果测试集没有对应的单词会丢弃（这个很严重。。。）
+tokenizer.fit_on_texts(list(trian_q_1))  # 用训练集去训练这个分词器，生成id_word 和word_id 等信息 如果测试集没有对应的单词会丢弃（这个很严重。。。）
+
+json_str = tokenizer.to_json()
+
+with open("./word_dic.json", 'w', encoding='utf-8') as json_file:
+    json.dump(json_str, json_file, ensure_ascii=False)
+
+trian_q_1 = tokenizer.texts_to_sequences(trian_q_1)
+trian_q_2 = tokenizer.texts_to_sequences(trian_q_2)
 
 
-def create_padded_seqs(texts, maxlen=10):
-    seqs = texts.apply(lambda s:
-                       [counts_vectorizer.vocabulary_[w] if w in counts_vectorizer.vocabulary_ else other_index
-                        for w in words_tokenizer.findall(s.lower())]
-                       )
+trian_q_1 = pad_sequences(trian_q_1, maxlen=maxlen)
+trian_q_2 = pad_sequences(trian_q_2, maxlen=maxlen)
 
-    return pad_sequences(seqs, maxlen)
+train_y = df_all['is_duplicate'].values
 
-
-
-
-# 通常在这种类分布不平衡的情况下会用到stratify。
 
 X1_train, X1_val, X2_train, X2_val, y_train, y_val = \
-    train_test_split(create_padded_seqs(df_all[df_all['id'].notnull()]['question1']),
-                     create_padded_seqs(df_all[df_all['id'].notnull()]['question2']),
-                     df_all[df_all['id'].notnull()]['is_duplicate'].values,
-                     stratify=df_all[df_all['id'].notnull()]['is_duplicate'].values,
-                     test_size=0.3, random_state=1989)
+    train_test_split(trian_q_1,
+                     trian_q_1,
+                     train_y,
+                     test_size=0.3)
 
 # import  keras.layers.IN
 
+# print(X1_train.shape())
+# print(X2_train.shape())
 
-print(X1_train[0])
-print(X2_train[0])
-
-
+print("first line1:", X1_train[0])
+print('first_line2', X2_train[0])
 
 input1_tensor = layers.Input(X1_train.shape[1:], name='input_1')
 input2_tensor = layers.Input(X2_train.shape[1:], name='input_2')
@@ -98,11 +99,11 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 
 print(model.summary())
 
-# model.fit([X1_train, X2_train], y_train,
-#           validation_data=([X1_val, X2_val], y_val),
-#           batch_size=128, epochs=1, verbose=1)
-#
-# model.save(filepath='./model.h5')
+model.fit([X1_train, X2_train], y_train,
+          validation_data=([X1_val, X2_val], y_val),
+          batch_size=128, epochs=1, verbose=1)
+
+model.save(filepath='./model_similar.h5')
 
 # evaluate = model.evaluate([X1_val, X2_val], y_val)
 #
