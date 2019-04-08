@@ -1,17 +1,15 @@
-from rasa_nlu.training_data import load_data
-from rasa_nlu.config import RasaNLUModelConfig
-from rasa_nlu.model import Trainer
-from rasa_nlu import config
+
 from rasa_core.agent import Agent
 from rasa_core.policies.memoization import MemoizationPolicy
 from rasa_core.interpreter import RasaNLUInterpreter
 from rasa_core.policies.keras_policy import KerasPolicy
 from rasa_core.channels.console import ConsoleInputChannel
 
+# from  rasa_core.channels.console import CmdlineInput
 
 def train_online(input_channel=ConsoleInputChannel(),
                  interpreter=RasaNLUInterpreter("models/demo/default/model_20180701-171646"),
-                 domain_file="data/domain.yml",
+                 domain_file="data/config_crf_custom_features.yml",
                  training_data_file="data/museum_story.md"):
     agent = Agent(domain_file,
                   policies=[MemoizationPolicy(), KerasPolicy()],
