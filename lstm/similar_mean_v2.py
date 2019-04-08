@@ -43,6 +43,8 @@ counts_vectorizer = CountVectorizer(max_features=10000 - 1).fit(
     itertools.chain(df_all['question1'], df_all['question2']))
 
 
+
+
 # counts_vectorizer.
 
 other_index = len(counts_vectorizer.vocabulary_)
