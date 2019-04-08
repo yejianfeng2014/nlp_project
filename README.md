@@ -26,3 +26,6 @@ git clone git@github.com:RasaHQ/rasa_nlu.git
 cd rasa_nlu
 pip install -r requirements.txt
 python setup.py install
+
+
+AttributeError: 'Agent' object has no attribute 'train_online'
