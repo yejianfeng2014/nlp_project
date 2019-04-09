@@ -29,3 +29,6 @@ python setup.py install
 
 
 AttributeError: 'Agent' object has no attribute 'train_online'
+
+
+https://rasa.com/docs/nlu/dataformat/#section-dataformat
