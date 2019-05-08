@@ -1,0 +1,35 @@
+{
+  'intent': {
+    'name': 'restaurant_search',
+    'confidence': 0.7980239384420291
+  },
+  'entities': [
+    {
+      'start': 31,
+      'end': 36,
+      'value': 'north',
+      'entity': 'location',
+      'confidence': 0.8415554788171643,
+      'extractor': 'ner_crf'
+    }
+  ],
+  'intent_ranking': [
+    {
+      'name': 'restaurant_search',
+      'confidence': 0.7980239384420291
+    },
+    {
+      'name': 'affirm',
+      'confidence': 0.07696378451967045
+    },
+    {
+      'name': 'greet',
+      'confidence': 0.07525897489648697
+    },
+    {
+      'name': 'goodbye',
+      'confidence': 0.04975330214181342
+    }
+  ],
+  'text': "i'm looking for a place in the north of town"
+}

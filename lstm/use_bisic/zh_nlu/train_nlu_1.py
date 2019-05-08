@@ -6,7 +6,7 @@ from rasa_nlu import config
 # 训练模型
 def train():
     # 示例数据
-    training_data = load_data('data/demo-rasa.json')
+    training_data = load_data('data/nlu_data.md')
     # pipeline配置
     trainer = Trainer(config.load("data/nlu_config.yml"))
     trainer.train(training_data)
